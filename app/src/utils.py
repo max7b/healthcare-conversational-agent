@@ -1,3 +1,4 @@
+import ast
 import re
 
 from langchain_community.chat_models import BedrockChat
@@ -42,3 +43,19 @@ def extract_xml_tags(xml_tags: str, xml_string: str) -> str:
     # Find all matches of the pattern in the XML string
     matches = re.findall(pattern, xml_string, re.DOTALL)
     return matches[0].replace("\n", "") if matches else ""
+
+
+def string_to_dict(input_str):
+    """
+    Convert a string representation of a dictionary into a Python dictionary.
+
+    Parameters:
+        input_str (str): The string representation of the dictionary.
+
+    Returns:
+        dict: The dictionary object.
+    """
+    try:
+        return ast.literal_eval(input_str)
+    except SyntaxError:
+        raise ValueError("Input string is not a valid dictionary")

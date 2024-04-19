@@ -1,4 +1,4 @@
-"""Model Settings
+"""Global Settings
 """
 
 import os

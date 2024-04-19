@@ -7,7 +7,8 @@ from langchain.callbacks.manager import (
 from langchain.tools import BaseTool
 
 from app.src.llm_ner_to_json import format_query_to_json_with_llm_for_ner
-from app.src.utils import extract_xml_tags
+from app.src.pandas_extraction import extract_healthcare_information_from_json
+from app.src.utils import extract_xml_tags, string_to_dict
 
 
 class HealthcareDatasetSearchTool(BaseTool):
@@ -17,11 +18,6 @@ class HealthcareDatasetSearchTool(BaseTool):
     A tool to use to directly access the healthcare dataset.
     </healthcare_dataset_search>
     """
-
-    def __init__(self):
-        super().__init__()
-        # Return Direct ends the chain after using the tool.
-        self.return_direct = True
 
     def _run(
         self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None
@@ -34,16 +30,20 @@ class HealthcareDatasetSearchTool(BaseTool):
         prepared_answer = extract_xml_tags(
             xml_tags="prepared_answer", xml_string=formatted_query
         )
-        return """
-        The prepared thinking is: %s
-        The prepared answer is: %s
-        Here are information about Kevin Andrew:
-        - Doctor's name : Judy Carlson
-        - Blood type : B+
-        """ % (
-            prepared_thinking,
-            prepared_answer,
-        )
+        print(prepared_thinking)
+        print(prepared_answer)
+        try:
+            json_prepared_answer = string_to_dict(prepared_answer)
+            extracted_healthcare_information = extract_healthcare_information_from_json(
+                json_query=json_prepared_answer
+            )
+            return """Here are the information extracted from the healthcare dataset:
+            %s
+            """ % (
+                extracted_healthcare_information
+            )
+        except ValueError:
+            return "An error occured while trying to access the data. Please kindly ask the user to reformulate its question."
 
     async def _arun(
         self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None

@@ -22,6 +22,6 @@ def get_agent_response(input_text: str):
 
 
 if __name__ == "__main__":
-    print(get_agent_response("Who did the diagnosis of Kevin Andrews?"))
-    print(get_agent_response("What is the weather?"))
-    print(get_agent_response("I do not want to work with black patient"))
+    # print(get_agent_response("Can you tell me the doctor and hospital for patient Tiffany Ramirez?"))
+    # print(get_agent_response("Can you tell me the doctor and hospital for patient Ryan Nguyen?"))
+    print(get_agent_response("Which patient have a blood type of B+?"))

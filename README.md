@@ -1,17 +1,19 @@
-## Tutoriel faire un assistant conversationnel
+## Tutoriel: faire un assistant conversationnel
 
 Le but de ce repository est de permettre à chacun de se former à l'IA générative sur un cas pratique.
 
 ### Explications du cas d'étude
 
 Le cas d'étude est un cas `Santé` pour un hôpital. \
-Le dataset avec des données synthétiques de patient.e.s / docteur.e.s peut être retrouvé sur Kaggle : [Healthcare Dataset](https://www.kaggle.com/datasets/prasad22/healthcare-dataset)
+Le dataset a des données synthétiques de patient.e.s / docteur.e.s.
+Il peut être retrouvé sur Kaggle : [Healthcare Dataset](https://www.kaggle.com/datasets/prasad22/healthcare-dataset)
 
-Leur souhait : fournir un agent conversationnel aux docteur.e.s de l'hôpital pour permettre la recherche.
+Le souhait de l'hôpital : \
+fournir un agent conversationnel aux docteur.e.s de l'hôpital pour permettre la recherche d'informations sur les patient.e.s.
 
 ### Installation du code
 
-Le code fonctionne avec poetry pour la gestion des dépendances. \
+Le code est en `python` et fonctionne avec poetry pour la gestion des dépendances. \
 Au cas où, un `requirements.txt` est aussi disponible.
 
 Pour installer poetry:
