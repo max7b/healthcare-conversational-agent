@@ -1,4 +1,4 @@
-from app.src.llm_ner_to_json import format_query_to_json_with_llm_for_ner
+from app.src.prompt_template_ner import format_query_to_json_with_llm_for_ner
 from app.src.utils import extract_xml_tags, string_to_dict
 
 

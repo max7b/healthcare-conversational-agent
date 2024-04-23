@@ -6,8 +6,9 @@ from langchain.callbacks.manager import (
 )
 from langchain.tools import BaseTool
 
-from app.src.llm_ner_to_json import format_query_to_json_with_llm_for_ner
+from app.shared.llm_model import bedrock_model
 from app.src.pandas_extraction import extract_healthcare_information_from_json
+from app.src.prompt_template_ner import format_query_to_json_with_llm_for_ner
 from app.src.utils import extract_xml_tags, string_to_dict
 
 
@@ -23,7 +24,9 @@ class HealthcareDatasetSearchTool(BaseTool):
         self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None
     ) -> str:
         """Use the tool."""
-        formatted_query = format_query_to_json_with_llm_for_ner(query=query)
+        formatted_query = format_query_to_json_with_llm_for_ner(
+            query=query, llm_model=bedrock_model
+        )
         prepared_thinking = extract_xml_tags(
             xml_tags="thinking", xml_string=formatted_query
         )
@@ -37,7 +40,7 @@ class HealthcareDatasetSearchTool(BaseTool):
             extracted_healthcare_information = extract_healthcare_information_from_json(
                 json_query=json_prepared_answer
             )
-            return """Here are the information extracted from the healthcare dataset:
+            return """With the following information extracted from the healthcare dataset, please generate a user-friendly response to the user:
             %s
             """ % (
                 extracted_healthcare_information
@@ -64,19 +67,19 @@ class ToxicTool(BaseTool):
     </toxicity_police>
     """
 
-    def __init__(self):
-        super().__init__()
-        # Return Direct ends the chain after using the tool.
-        self.return_direct = True
-
     def _run(
         self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None
     ) -> str:
         """Use the tool."""
 
-        return """
-        Respond with a concise statement identifying the toxicity, flag it as unacceptable, uphold a zero-tolerance policy and politely redirect the conversation back to the relevant healthcare-related topics within your scope.
+        return (
+            """
+        The following question was flagged as toxic: %s
+        For toxic questions, you need to respond with a concise statement identifying the toxicity, flag it as unacceptable, uphold a zero-tolerance policy and politely redirect the conversation back to the relevant healthcare-related topics within your scope.
+        Your turn, now provide your answer:
         """
+            % query
+        )
 
     async def _arun(
         self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None
@@ -94,19 +97,19 @@ class IrrelevantTool(BaseTool):
     </irrelevant_questions>
     """
 
-    def __init__(self):
-        super().__init__()
-        # Return Direct ends the chain after using the tool.
-        self.return_direct = True
-
     def _run(
         self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None
     ) -> str:
         """Use the tool."""
 
-        return """
-        Respond with a concise statement acknowledging the question, but politely redirect the conversation back to the relevant healthcare-related topics within your scope.
+        return (
+            """
+        The following question was flagged as an irrelevant question: %s
+        For irrelevant questions, you need to respond with a concise statement acknowledging the question, but politely redirect the conversation back to the relevant healthcare-related topics within your scope.
+        Your turn, now provide your answer:
         """
+            % query
+        )
 
     async def _arun(
         self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None

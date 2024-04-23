@@ -1,7 +1,4 @@
-from app.src.utils import get_llm_model
-
-
-def format_query_to_json_with_llm_for_ner(query: str):
+def format_query_to_json_with_llm_for_ner(query: str, llm_model):
     llm_prompt = (
         """
     Act like a linquistic expert and secretary to a renowned doctor.
@@ -49,5 +46,5 @@ def format_query_to_json_with_llm_for_ner(query: str):
     """
         % query
     )
-    llm_model = get_llm_model()
+
     return llm_model.invoke(llm_prompt).content
