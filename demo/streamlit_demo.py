@@ -1,25 +1,41 @@
-from urllib.parse import quote
-
-import requests
 import streamlit as st
 from langchain_community.callbacks.streamlit import StreamlitCallbackHandler
+
+from app.shared.llm_model import bedrock_model
+from app.src.agent import get_agent_response
 
 st_callback = StreamlitCallbackHandler(st.container())
 
 
 def get_response(query):
-    # Make a POST request to the server endpoint
-    encoded_query = quote(query)
-    response = requests.post(f"http://0.0.0.0:8000/conversation/?query={encoded_query}")
-    if response.status_code == 200:
-        return response.json()
-    else:
-        return {"output": "Failed to get response from server."}
+    return get_agent_response(
+        input_text=query, llm_model=bedrock_model, callbacks=st_callback
+    )
 
 
 st.title("Conversational Agent")
 
+# initialize the chat history
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
+
+# Re-render the chat history (Streamlit re-runs this script, so need this to preserve previous chat messages)
+for message in st.session_state.chat_history:
+    with st.chat_message(message["role"]):
+        st.markdown(message["text"])
+
+# The agent starts by engaging conversation
+if not st.session_state.chat_history:
+    with st.chat_message("assistant"):
+        first_message = "Hello, how can I assist you today?"
+        st.markdown(first_message)
+        st.session_state.chat_history.append(
+            {"role": "assistant", "text": first_message}
+        )
+
 if prompt := st.chat_input():
+    # append the user's latest message to the chat history
+    st.session_state.chat_history.append({"role": "user", "text": prompt})
     st.chat_message("user").write(prompt)
     with st.chat_message("assistant"):
         st_callback = StreamlitCallbackHandler(st.container())
@@ -27,3 +43,8 @@ if prompt := st.chat_input():
         response = get_response(prompt)
         # Display response
         st.write(response["output"])
+
+    # append the bot's latest message to the chat history
+    st.session_state.chat_history.append(
+        {"role": "assistant", "text": response["output"]}
+    )
