@@ -1,3 +1,4 @@
+from app.shared.llm_model import bedrock_model
 from app.src.prompt_template_ner import format_query_to_json_with_llm_for_ner
 from app.src.utils import extract_xml_tags, string_to_dict
 
@@ -10,7 +11,9 @@ def test_retrieve_samantha_rodriguez_info():
         "patient_blood_type": "True",
         "patient_medical_condition": "True",
     }
-    llm_response = format_query_to_json_with_llm_for_ner(query=query)
+    llm_response = format_query_to_json_with_llm_for_ner(
+        query=query, llm_model=bedrock_model
+    )
     prepared_answer = extract_xml_tags(
         xml_tags="prepared_answer", xml_string=llm_response
     )
@@ -22,7 +25,9 @@ def test_retrieve_samantha_rodriguez_info():
 def test_retrieve_michael_johnson_doctor():
     query = "Who is the doctor for patient Michael Johnson?"
     expected_json = {"patient_name": "Michael Johnson", "patient_doctor": "True"}
-    llm_response = format_query_to_json_with_llm_for_ner(query=query)
+    llm_response = format_query_to_json_with_llm_for_ner(
+        query=query, llm_model=bedrock_model
+    )
     prepared_answer = extract_xml_tags(
         xml_tags="prepared_answer", xml_string=llm_response
     )
@@ -34,7 +39,9 @@ def test_retrieve_michael_johnson_doctor():
 def test_retrieve_tiffany_davis_hospital():
     query = "Please provide the hospital information for patient Tiffany Davis."
     expected_json = {"patient_name": "Tiffany Davis", "patient_hospital": "True"}
-    llm_response = format_query_to_json_with_llm_for_ner(query=query)
+    llm_response = format_query_to_json_with_llm_for_ner(
+        query=query, llm_model=bedrock_model
+    )
     prepared_answer = extract_xml_tags(
         xml_tags="prepared_answer", xml_string=llm_response
     )
@@ -49,7 +56,9 @@ def test_retrieve_ethan_nguyen_medical_condition():
         "patient_name": "Ethan Nguyen",
         "patient_medical_condition": "True",
     }
-    llm_response = format_query_to_json_with_llm_for_ner(query=query)
+    llm_response = format_query_to_json_with_llm_for_ner(
+        query=query, llm_model=bedrock_model
+    )
     prepared_answer = extract_xml_tags(
         xml_tags="prepared_answer", xml_string=llm_response
     )
@@ -65,7 +74,9 @@ def test_retrieve_jessica_lee_blood_type_and_doctor():
         "patient_blood_type": "True",
         "patient_doctor": "True",
     }
-    llm_response = format_query_to_json_with_llm_for_ner(query=query)
+    llm_response = format_query_to_json_with_llm_for_ner(
+        query=query, llm_model=bedrock_model
+    )
     prepared_answer = extract_xml_tags(
         xml_tags="prepared_answer", xml_string=llm_response
     )
@@ -81,7 +92,9 @@ def test_retrieve_david_patel_hospital_and_medical_condition():
         "patient_hospital": "True",
         "patient_medical_condition": "True",
     }
-    llm_response = format_query_to_json_with_llm_for_ner(query=query)
+    llm_response = format_query_to_json_with_llm_for_ner(
+        query=query, llm_model=bedrock_model
+    )
     prepared_answer = extract_xml_tags(
         xml_tags="prepared_answer", xml_string=llm_response
     )
@@ -98,7 +111,9 @@ def test_retrieve_patient_info_for_hypertension():
         "patient_doctor": "True",
         "patient_medical_condition": "Hypertension",
     }
-    llm_response = format_query_to_json_with_llm_for_ner(query=query)
+    llm_response = format_query_to_json_with_llm_for_ner(
+        query=query, llm_model=bedrock_model
+    )
     prepared_answer = extract_xml_tags(
         xml_tags="prepared_answer", xml_string=llm_response
     )
@@ -114,7 +129,9 @@ def test_retrieve_patient_info_for_blood_type_b_plus():
         "patient_hospital": "True",
         "patient_medical_condition": "True",
     }
-    llm_response = format_query_to_json_with_llm_for_ner(query=query)
+    llm_response = format_query_to_json_with_llm_for_ner(
+        query=query, llm_model=bedrock_model
+    )
     prepared_answer = extract_xml_tags(
         xml_tags="prepared_answer", xml_string=llm_response
     )
@@ -131,7 +148,9 @@ def test_retrieve_patient_info_for_arthritis():
         "patient_hospital": "True",
         "patient_medical_condition": "Arthritis",
     }
-    llm_response = format_query_to_json_with_llm_for_ner(query=query)
+    llm_response = format_query_to_json_with_llm_for_ner(
+        query=query, llm_model=bedrock_model
+    )
     prepared_answer = extract_xml_tags(
         xml_tags="prepared_answer", xml_string=llm_response
     )
@@ -147,7 +166,9 @@ def test_retrieve_olivia_gonzalez_blood_type_and_medical_condition():
         "patient_blood_type": "True",
         "patient_medical_condition": "True",
     }
-    llm_response = format_query_to_json_with_llm_for_ner(query=query)
+    llm_response = format_query_to_json_with_llm_for_ner(
+        query=query, llm_model=bedrock_model
+    )
     prepared_answer = extract_xml_tags(
         xml_tags="prepared_answer", xml_string=llm_response
     )
@@ -163,7 +184,9 @@ def test_retrieve_ryan_nguyen_doctor_and_hospital():
         "patient_doctor": "True",
         "patient_hospital": "True",
     }
-    llm_response = format_query_to_json_with_llm_for_ner(query=query)
+    llm_response = format_query_to_json_with_llm_for_ner(
+        query=query, llm_model=bedrock_model
+    )
     prepared_answer = extract_xml_tags(
         xml_tags="prepared_answer", xml_string=llm_response
     )
@@ -180,7 +203,9 @@ def test_retrieve_patient_info_for_walton_llc_hospital():
         "patient_medical_condition": "True",
         "patient_hospital": "Walton LLC",
     }
-    llm_response = format_query_to_json_with_llm_for_ner(query=query)
+    llm_response = format_query_to_json_with_llm_for_ner(
+        query=query, llm_model=bedrock_model
+    )
     prepared_answer = extract_xml_tags(
         xml_tags="prepared_answer", xml_string=llm_response
     )
@@ -196,7 +221,9 @@ def test_retrieve_patient_info_for_diabetes():
         "patient_hospital": "True",
         "patient_medical_condition": "Diabetes",
     }
-    llm_response = format_query_to_json_with_llm_for_ner(query=query)
+    llm_response = format_query_to_json_with_llm_for_ner(
+        query=query, llm_model=bedrock_model
+    )
     prepared_answer = extract_xml_tags(
         xml_tags="prepared_answer", xml_string=llm_response
     )
@@ -213,7 +240,9 @@ def test_retrieve_patient_info_for_dr_diane_jackson():
         "patient_medical_condition": "True",
         "patient_doctor": "Diane Jackson",
     }
-    llm_response = format_query_to_json_with_llm_for_ner(query=query)
+    llm_response = format_query_to_json_with_llm_for_ner(
+        query=query, llm_model=bedrock_model
+    )
     prepared_answer = extract_xml_tags(
         xml_tags="prepared_answer", xml_string=llm_response
     )
@@ -230,7 +259,9 @@ def test_retrieve_patient_info_for_asthma():
         "patient_hospital": "True",
         "patient_medical_condition": "Asthma",
     }
-    llm_response = format_query_to_json_with_llm_for_ner(query=query)
+    llm_response = format_query_to_json_with_llm_for_ner(
+        query=query, llm_model=bedrock_model
+    )
     prepared_answer = extract_xml_tags(
         xml_tags="prepared_answer", xml_string=llm_response
     )
@@ -247,7 +278,9 @@ def test_retrieve_patient_info_for_brown_inc_hospital():
         "patient_medical_condition": "True",
         "patient_hospital": "Brown Inc",
     }
-    llm_response = format_query_to_json_with_llm_for_ner(query=query)
+    llm_response = format_query_to_json_with_llm_for_ner(
+        query=query, llm_model=bedrock_model
+    )
     prepared_answer = extract_xml_tags(
         xml_tags="prepared_answer", xml_string=llm_response
     )
@@ -264,7 +297,9 @@ def test_retrieve_patient_info_for_blood_type_a_minus():
         "patient_medical_condition": "True",
         "patient_blood_type": "A-",
     }
-    llm_response = format_query_to_json_with_llm_for_ner(query=query)
+    llm_response = format_query_to_json_with_llm_for_ner(
+        query=query, llm_model=bedrock_model
+    )
     prepared_answer = extract_xml_tags(
         xml_tags="prepared_answer", xml_string=llm_response
     )
@@ -281,7 +316,9 @@ def test_retrieve_patient_info_for_obesity():
         "patient_hospital": "True",
         "patient_medical_condition": "Obesity",
     }
-    llm_response = format_query_to_json_with_llm_for_ner(query=query)
+    llm_response = format_query_to_json_with_llm_for_ner(
+        query=query, llm_model=bedrock_model
+    )
     prepared_answer = extract_xml_tags(
         xml_tags="prepared_answer", xml_string=llm_response
     )
@@ -298,7 +335,9 @@ def test_retrieve_jennifer_nguyen_info():
         "patient_doctor": "True",
         "patient_medical_condition": "True",
     }
-    llm_response = format_query_to_json_with_llm_for_ner(query=query)
+    llm_response = format_query_to_json_with_llm_for_ner(
+        query=query, llm_model=bedrock_model
+    )
     prepared_answer = extract_xml_tags(
         xml_tags="prepared_answer", xml_string=llm_response
     )
@@ -315,7 +354,9 @@ def test_retrieve_patient_info_for_dr_brian_chandler():
         "patient_medical_condition": "True",
         "patient_doctor": "Dr. Brian Chandler",
     }
-    llm_response = format_query_to_json_with_llm_for_ner(query=query)
+    llm_response = format_query_to_json_with_llm_for_ner(
+        query=query, llm_model=bedrock_model
+    )
     prepared_answer = extract_xml_tags(
         xml_tags="prepared_answer", xml_string=llm_response
     )
