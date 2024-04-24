@@ -22,7 +22,7 @@ def get_session_history(session_id: str) -> BaseChatMessageHistory:
     return store[session_id]
 
 
-def get_agent_response(input_text: str, llm_model, session_id, callbacks=None):
+def get_agent_response(input_text: str, llm_model, session_id="1234", callbacks=None):
     tools = [
         HealthcareDatasetSearchTool(),
         ToxicTool(),
@@ -47,5 +47,8 @@ def get_agent_response(input_text: str, llm_model, session_id, callbacks=None):
 
     return agent_with_chat_history.invoke(
         {"input": input_text},
-        config={"configurable": {"session_id": session_id}, "callbacks": [callbacks]},
+        config={
+            "configurable": {"session_id": session_id},
+            "callbacks": [callbacks] if callbacks else [],
+        },
     )
