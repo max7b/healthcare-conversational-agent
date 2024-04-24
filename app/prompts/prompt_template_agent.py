@@ -50,6 +50,11 @@ Here are some eaxmples to help you understand how to use the format for your ans
 
 Begin and apply each rules!
 
+Previous Conversation:
+<chat_history>
+{chat_history}
+</chat_history>
+
 <question>{input}</question>
 {agent_scratchpad}
 """

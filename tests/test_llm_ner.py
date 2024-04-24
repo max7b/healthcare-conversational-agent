@@ -1,5 +1,5 @@
+from app.prompts.prompt_template_ner import format_query_to_json_with_llm_for_ner
 from app.shared.llm_model import bedrock_model
-from app.src.prompt_template_ner import format_query_to_json_with_llm_for_ner
 from app.src.utils import extract_xml_tags, string_to_dict
 
 

@@ -5,14 +5,6 @@ from app.shared.llm_model import bedrock_model
 from app.src.agent import get_agent_response
 
 st_callback = StreamlitCallbackHandler(st.container())
-
-
-def get_response(query):
-    return get_agent_response(
-        input_text=query, llm_model=bedrock_model, callbacks=st_callback
-    )
-
-
 st.title("Conversational Agent")
 
 # initialize the chat history
@@ -40,7 +32,12 @@ if prompt := st.chat_input():
     with st.chat_message("assistant"):
         st_callback = StreamlitCallbackHandler(st.container())
         # Get response
-        response = get_response(prompt)
+        response = get_agent_response(
+            input_text=prompt,
+            llm_model=bedrock_model,
+            session_id="1234",
+            callbacks=st_callback,
+        )
         # Display response
         st.write(response["output"])
 

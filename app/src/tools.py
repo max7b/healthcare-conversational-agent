@@ -6,9 +6,9 @@ from langchain.callbacks.manager import (
 )
 from langchain.tools import BaseTool
 
+from app.prompts.prompt_template_ner import format_query_to_json_with_llm_for_ner
 from app.shared.llm_model import bedrock_model
 from app.src.pandas_extraction import extract_healthcare_information_from_json
-from app.src.prompt_template_ner import format_query_to_json_with_llm_for_ner
 from app.src.utils import extract_xml_tags, string_to_dict
 
 
@@ -76,6 +76,7 @@ class ToxicTool(BaseTool):
             """
         The following question was flagged as toxic: %s
         For toxic questions, you need to respond with a concise statement identifying the toxicity, flag it as unacceptable, uphold a zero-tolerance policy and politely redirect the conversation back to the relevant healthcare-related topics within your scope.
+        After using the toxicity_police tool, stick to answering the question only: do not loop or use any other tools.
         Your turn, now provide your answer:
         """
             % query
@@ -106,6 +107,36 @@ class IrrelevantTool(BaseTool):
             """
         The following question was flagged as an irrelevant question: %s
         For irrelevant questions, you need to respond with a concise statement acknowledging the question, but politely redirect the conversation back to the relevant healthcare-related topics within your scope.
+        After using the irrelevant_questions tool, stick to answering the question only: do not loop or use any other tools.
+        Your turn, now provide your answer:
+        """
+            % query
+        )
+
+    async def _arun(
+        self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None
+    ) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError("This tool does not support async")
+
+
+class ChatHistoryTool(BaseTool):
+    name = "chat_history_questions"
+    description = """
+    <chat_history_questions>
+    A tool to answer questions related to the chat history.
+    </chat_history_questions>
+    """
+
+    def _run(
+        self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None
+    ) -> str:
+        """Use the tool."""
+
+        return (
+            """
+        The following question is related to the chat history: %s
+        Please use the chat history to provide a concise and meaningful answer to the user.
         Your turn, now provide your answer:
         """
             % query
