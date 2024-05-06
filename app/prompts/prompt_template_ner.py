@@ -1,6 +1,26 @@
-def format_query_to_json_with_llm_for_ner(query: str, llm_model):
-    llm_prompt = (
-        """
+from langchain.chat_models.base import BaseChatModel
+
+
+def format_query_to_json_with_llm_for_ner(query: str, llm_model: BaseChatModel) -> str:
+	"""
+	Uses a LLM to format a string query to a dict string.
+	The dict string contains the necessary information to query a pandas dataframe.
+
+	The returned string will have the following format:
+	- <thinking> tags for the model to output its thinking steps. Useful to improve model accuracy and easy debugging.
+	- <prepared_answer> tags for the model to output the dict.
+
+	Args:
+	----
+	query (str): The LLM answer string.
+	llm_model (BaseChatModel): The LLM model used to generate the dict answer.
+
+	Returns:
+	-------
+	The processed LLM answer dict string.
+
+	"""
+	llm_prompt = f"""
     Act like a linquistic expert and secretary to a renowned doctor.
     Given the query in the xml tags <query></query>, please extract the following entities:
     - patient_name: the patient's name
@@ -22,19 +42,19 @@ def format_query_to_json_with_llm_for_ner(query: str, llm_model):
     <thinking>The query mentions explicitely the patient name so I can extract it in the answer.
     The query asks for information about the blood type and hospital so I can set their values to 'True'.
     The other entities are not explicitly mentioned, so I will not output them in my answer.</thinking>
-    <prepared_answer>{'patient_name': 'Christina Hernandez', 'patient_blood_type': 'True', 'patient_hospital': 'True'}</prepared_answer>
+    <prepared_answer>{"{'patient_name': 'Christina Hernandez', 'patient_blood_type': 'True', 'patient_hospital': 'True'}"}</prepared_answer>
 
     <query>Who was Paul Graham doctor and medical condition?</query>
     <thinking>The query mentions explicitely the patient name so I can extract it in the answer.
     The query asks for information about the doctor's name and medical condition so I can set their values to 'True'.
     The other entities are not explicitly mentioned, so I will not output them in my answer.</thinking>
-    <prepared_answer>{'patient_name': 'Paul Graham', 'patient_doctor': 'True', 'patient_medical_condition': 'True'}</prepared_answer>
+    <prepared_answer>{"{'patient_name': 'Paul Graham', 'patient_doctor': 'True', 'patient_medical_condition': 'True'}"}</prepared_answer>
 
     <query>Find a type AB+ patient at Browning PLC hospital?</query>
     <thinking>The query mentions explicitely the blood type and the hospital so I can extract it in the answer.
     The query asks for information about a patient's name so I can set its value to 'True'.
     The other entities are not explicitly mentioned, so I will not output them in my answer.</thinking>
-    <prepared_answer>{'patient_name': 'True', 'patient_blood_type': 'AB+', 'patient_hospital': 'Browning PLC'}</prepared_answer>
+    <prepared_answer>{"{'patient_name': 'True', 'patient_blood_type': 'AB+', 'patient_hospital': 'Browning PLC'}"}</prepared_answer>
 
     <query>What is the weather like in Boston?</query>
     <thinking>The query does not mention any of the entities so my answer is empty.</thinking>
@@ -42,9 +62,7 @@ def format_query_to_json_with_llm_for_ner(query: str, llm_model):
     </examples>
 
     Your turn, here is the query:
-    <query>%s</query>
+    <query>{query}</query>
     """
-        % query
-    )
 
-    return llm_model.invoke(llm_prompt).content
+	return llm_model.invoke(llm_prompt).content

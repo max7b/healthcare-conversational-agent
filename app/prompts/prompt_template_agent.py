@@ -1,5 +1,6 @@
-"""Prompt Template
-Inspired from : https://smith.langchain.com/hub/hwchase17/xml-agent-convo
+"""
+Prompt Template
+Inspired from : https://smith.langchain.com/hub/hwchase17/xml-agent-convo.
 """
 
 prompt_template = """

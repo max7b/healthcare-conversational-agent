@@ -1,0 +1,80 @@
+line-length = 100
+
+[lint]
+select = [
+    "E",  # pycodestyle - error
+    "W",  # pycodestyle - warning
+    "D", # pydocstyle --> very important but results in too many errors to fix 
+    "F",  # Pyflakes
+    "PL", # PyLint
+    "UP",  # pyupgrade
+    "N", # pep-8 naming
+    "I",  # isort
+    "PD", # pandas-vet
+    "NPY", # NumPy-specific rules
+    "PERF", # Perflint
+
+    # --- flake-8 ---
+    "ARG", # flake8-unused-arguments
+    "SIM",  # flake8-simplify
+    "A", # flake8-builtins
+    "C4", # flake8-comprehensions
+    "ANN", # flake8-annotations
+    "PYI", # flake8-pyi
+    "PT", # flake8-pytest-style
+    "ISC", # flake8-implicit-str-concat
+    "ICN", # flake8-import-conventions
+    "PIE", # flake8-pie
+    "T20", # flake8-print
+    "RET", # flake8-return
+    "TID", # flake8-tidy-imports
+    "TCH", # flake8-type-checking
+    "B", # flake8-bugbear
+]
+
+ignore = [
+    "E501", # line-too-long
+    "E101", # mix-spaces-and-tabs
+    "E203", # whitespace-before-punctuation
+    "W191", # tab-indentation --> conflict with formatter
+    "ISC001", # single-line-implicit-string-concatenation
+
+    # --- Docstring ---
+    "D100", # undocumented-public-module
+    "D203", # one-blank-line-before-class
+    "D212", # multi-line-summary-first-line
+    "D206", # indent-with-space
+    "D401", # non-imperative-mood
+    "D205", # blank-line-after-summary
+    "D107", # undocumented-public-init
+
+    "ANN101", # missing-type-self
+]
+
+extend-safe-fixes = ["C", "D", "A", "W291"]
+
+[lint.extend-per-file-ignores]
+"**/__init__.py" = ["D"]
+"**/tests/*.py" = ["D", "ANN201"]
+
+
+[format]
+quote-style = "double"
+indent-style = "tab"
+docstring-code-format = true
+exclude = [
+    # Rules conflicting with the linter
+    "E111",  # indentation-with-invalid-multiple
+    "E114",  # indentation-with-invalid-multiple-comment
+    "E117",  # over-indented
+    "D206",  # indent-with-spaces
+    "D300",  # triple-single-quotes
+    "Q000",  # bad-quotes-inline-string
+    "Q001",  # bad-quotes-multiline-string
+    "Q002",  # bad-quotes-docstring
+    "Q003",  # avoidable-escaped-quote
+    "COM812",  # missing-trailing-comma
+    "COM819",  # prohibited-trailing-comma
+    "ISC001",  # single-line-implicit-string-concatenation
+    "ISC002"   # multi-line-implicit-string-concatenation
+]
