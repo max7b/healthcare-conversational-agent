@@ -1,148 +1,65 @@
-# Tutoriel : Créer un assistant conversationnel
+# Healthcare Conversational Agent
 
-Ce repository construit un agent conversationnel dans le contexte de la santé : un assistant qui permet aux médecin·e·s d'un hôpital de rechercher des informations sur les patient·e·s.
+A chat assistant that lets hospital doctors look up patient information in plain language, and that refuses toxic or off-topic requests.
 
-Il sert aussi de tutoriel pour se former à l'IA générative.
+I built it with LangChain and Claude 3 Haiku on AWS Bedrock, to learn how to make an LLM agent reliable enough to put in front of users. The data is synthetic.
 
-Table des matières :
+## How a question is handled
 
-- [Tutoriel : Créer un assistant conversationnel](#tutoriel--créer-un-assistant-conversationnel)
-  - [1. Explication du cas d'étude](#1-explication-du-cas-détude)
-  - [2. Installation du code](#2-installation-du-code)
-    - [2.1. Installation de l'environnement](#21-installation-de-lenvironnement)
-    - [2.2. Configuration d'AWS Bedrock](#22-configuration-daws-bedrock)
-  - [3. Explication du code](#3-explication-du-code)
-    - [3.1. Agent IA et tools](#31-agent-ia-et-tools)
-    - [3.2. Liste des tools](#32-liste-des-tools)
-      - [3.2.1. Tool : Healthcare Data Search](#321-tool--healthcare-data-search)
-    - [3.3. LLM : Claude 3 - Haiku](#33-llm--claude-3---haiku)
-    - [3.4. Monitoring du prompt](#34-monitoring-du-prompt)
-  - [4. Pour contribuer](#4-pour-contribuer)
-    - [4.1. ⚠️ IMPORTANT : Hooks de pré-commit](#41-️-important--hooks-de-pré-commit)
-    - [4.2. Pour ajouter des packages](#42-pour-ajouter-des-packages)
-    - [4.3. Pour la gestion des branches Git](#43-pour-la-gestion-des-branches-git)
+Take the question "What is the blood type and medical condition of Samantha Rodriguez?".
 
-## 1. Explication du cas d'étude
+1. **The agent picks a tool.** It follows the [ReAct](https://react-lm.github.io/) pattern: it reasons about the question, then chooses one of four tools. Here it chooses the data search.
+2. **A second LLM call turns the question into a query.** It extracts the entities and marks what is being asked for:
+   ```python
+   {'patient_name': 'Samantha Rodriguez', 'patient_blood_type': 'True', 'patient_medical_condition': 'True'}
+   ```
+3. **Plain Python does the lookup.** The dictionary is used to filter the dataset with pandas. The model never writes or runs a query itself.
+4. **The agent writes the reply** from the rows that came back.
 
-Le cas d'étude est un cas `Santé` pour un hôpital. \
-Le souhait de l'hôpital :
+The other three tools cover what the agent should not answer, or cannot answer alone:
 
-- Fournir un agent conversationnel aux médecin·e·s de l'hôpital pour permettre la recherche d'informations sur les patient·e·s.
+| The doctor says | Tool that fires | What happens |
+|---|---|---|
+| "I hate all patients with mental health issues." | Toxicity Police | The agent refuses and steers back to the use case |
+| "How's the weather today?" | Irrelevancy | The agent says this is outside its scope |
+| "Who was the first patient with blood type B+?" (after earlier questions) | Conversation history | The agent answers from earlier turns |
 
-Le dataset contient des données synthétiques de patient·e·s et de docteur·e·s.
+## Design choices
 
-![Image d'un extrait du dataset Santé](./docs/img/healthcare_dataset_sample.png)
+- **The model never touches the data directly.** It only produces a small dictionary over five allowed fields (name, blood type, doctor, hospital, medical condition). Anything outside those fields cannot be queried, whatever the prompt says.
+- **Guardrails are tools, and toxicity has priority.** Requests for forbidden patient data are treated as toxic, alongside hate speech and insults.
+- **Broad requests are refused.** If a question would return the whole dataset, the agent asks the doctor to be more specific. Results are capped at five rows.
+- **Prompts are tested like code.** 48 pytest cases check that the right tool fires and that the extraction returns the expected dictionary. A prompt edit or a model update that changes behaviour shows up as a failing test.
+- **Prompts are written for Claude 3 Haiku**, using XML tags and a thinking step before the answer.
 
-Le dataset peut être retrouvé sur Kaggle : [Healthcare Dataset](https://www.kaggle.com/datasets/prasad22/healthcare-dataset)
+## Limits
 
-Pour plus d'explications sur le fonctionnement du code, voir [section 3](#3-explication-du-code).
+- Lookups are exact matches, so a misspelled patient name finds nothing.
+- Conversation memory is held in process memory with a single session, which is fine for a demo and not for several users.
+- The tests call the real model, so they need AWS access, cost a little, and can occasionally vary between runs.
+- It runs on LangChain 0.1 and Claude 3 Haiku. Dependencies are pinned to those versions and the project is not maintained.
 
-## 2. Installation du code
+## Run it
 
-### 2.1. Installation de l'environnement
+You need Python 3.10+, [Poetry](https://python-poetry.org/), and an AWS account with access to Claude 3 Haiku on Bedrock (region `us-east-1`).
 
-Le code est en Python et fonctionne avec Poetry pour la gestion des dépendances. \
-Un fichier `requirements.txt` est également disponible.
+```bash
+poetry install
+cp .env_template .env   # then set AWS_CREDENTIALS_PROFILE_NAME to an AWS CLI profile with Bedrock access
+python -m streamlit run demo/streamlit_demo.py
+```
 
-Pour installer Poetry :\
-`pip install -U pip setuptools`\
-`pip install poetry`
+Run the tests with `pytest`.
 
-Pour créer votre environnement virtuel Python :\
-`python -m venv .venv`
+## Where things are
 
-Pour ajouter votre `.venv` à Poetry :\
-`poetry env use /full/path/to/.venv/bin/python` \
-(Pour trouver le chemin, exécutez `which python` après avoir activé l'environnement)
+- `app/src/`: the agent and its tools
+- `app/prompts/`: the agent prompt and the extraction prompt
+- `app/utils/`: the pandas lookup and parsing helpers
+- `tests/`: prompt tests for toxicity, irrelevancy and extraction
+- `demo/`: the Streamlit chat interface
+- `data/`: synthetic patient data from Kaggle's [Healthcare Dataset](https://www.kaggle.com/datasets/prasad22/healthcare-dataset)
 
-### 2.2. Configuration d'AWS Bedrock
+## License
 
-Copiez le fichier `.env_template` vers `.env` et renseignez `AWS_CREDENTIALS_PROFILE_NAME` avec le nom d'un profil AWS CLI ayant accès à Claude 3 Haiku sur Bedrock (région `us-east-1`).
-
-## 3. Explication du code
-
-Pour lancer la démo en streamlit :\
-`python -m streamlit run demo/streamlit_demo.py`
-
-### 3.1. Agent IA et tools
-
-Le cœur du projet se trouve dans `app/src/`. \
-Vous y trouverez le code Python pour l'agent conversationnel et celui pour les tools.
-
-Les "tools" font référence aux outils disponibles pour l'agent conversationnel afin d'effectuer des actions.\
-Par exemple, sur ChatGPT, on trouve des outils comme Bing pour permettre à l'agent d'effectuer des recherches sur Internet.
-
-L'agent conversationnel fonctionne en suivant la logique [ReAct](https://react-lm.github.io/) pour raisonner (Reasoning) et agir (Acting).
-
-Le code pour l'agent et ses outils est construit en utilisant [LangChain](https://python.langchain.com/docs/get_started/introduction/).
-
-### 3.2. Liste des tools
-
-La liste des outils est :
-
-- Toxicity Police : pour la gestion des questions à caractère toxique (par exemple : sexisme, racisme, demande d'informations compromettantes...)
-- Irrelevancy : pour la gestion des questions sans lien avec le cas d'étude (par exemple : demander la météo)
-- Healthcare Data Search : pour la gestion des questions sur les informations des patient·e·s (uniquement les informations autorisées, sinon --> toxicity police)
-- Historique de la conversation : pour la gestion des questions nécessitant d'avoir accès à l'historique de la conversation (par exemple : qui était le premier patient avec le groupe sanguin B+?)
-
-#### 3.2.1. Tool : Healthcare Data Search
-
-L'outil "Healthcare Data Search" fait appel à un deuxième LLM pour générer une réponse formatée.
-
-Ce tool a son propre prompt dédié qui lui permet de convertir la requête de l'utilisateur en un dictionnaire Python facilement utilisable pour requêter un dataset. \
-On peut assimiler l'utilisation de ce tool à une tâche de [Named Entity Recognition (NER)](https://en.wikipedia.org/wiki/Named-entity_recognition).
-
-Par exemple :
-
-- Requête : "Quel est le groupe sanguin de Christina Hernandez ?"
-- Réponse de l'agent : `{'patient_name': 'Christina Hernandez', 'patient_blood_type': 'True'}`
-- Explication : La requête a été transformée en un dictionnaire facilement utilisable. Maintenant, nous pouvons aller chercher dans notre jeu de données le patient `patient_name` et obtenir/retourner la valeur du `patient_blood_type` pour formuler la réponse.
-
-### 3.3. LLM : Claude 3 - Haiku
-
-Dans ce tutoriel, [Claude 3 - Haiku](https://www.anthropic.com/news/claude-3-family) est utilisé pour les raisons suivantes :
-
-- Rapide et peu coûteux
-- AWS Bedrock : pour montrer comment utiliser simplement Bedrock
-- [Prompt engineering](https://docs.anthropic.com/claude/docs/prompt-engineering) : pour montrer les techniques spécifiques aux modèles de la famille Claude (notamment l'utilisation des balises XML)
-
-### 3.4. Monitoring du prompt
-
-Il est important de monitorer le prompt pour deux raisons :
-
-- Le changement et/ou l'évolution du modèle (par exemple : une mise à jour de GPT-3.5 qui viendrait rompre le fonctionnement de notre agent sans que nous modifions le prompt)
-- L'ajout de features ou de fixs en modifiant le prompt (pour s'assurer que le nouveau prompt ne va pas casser le fonctionnement de l'application)
-
-Heureusement, il est assez simple de monitorer le prompt avec des tests, et il est même possible d'écrire son prompt en faisant du [Test Driven Development (TDD)](https://en.wikipedia.org/wiki/Test-driven_development).
-
-Pour ce tutoriel, trois ensembles de tests ont été mis en place dans le dossier `/tests/` :
-
-- `test_irrelevancy` : pour tester la bonne activation du tool sur les questions hors-sujet
-- `test_toxicity` : pour tester la bonne activation du tool sur la toxicité
-- `test_llm_ner` : pour tester la bonne conversion d'une requête en un dictionnaire par le deuxième prompt
-
-## 4. Pour contribuer
-
-### 4.1. ⚠️ IMPORTANT : Hooks de pré-commit
-
-Il y a des hooks de pré-commit, merci de les utiliser :\
-`pre-commit install`
-
-Ces hooks permettent de maintenir un environnement de développement propre et cohérent entre les développeurs.
-
-Les hooks se basent sur [Ruff](https://docs.astral.sh/ruff/tutorial/) pour garantir la conformité aux normes de codage PEP8, faciliter la détection d'erreurs et bien plus.
-
-### 4.2. Pour ajouter des packages
-
-Pour ajouter un package, il faut passer par Poetry :\
-`poetry add <nom_du_package>`
-
-### 4.3. Pour la gestion des branches Git
-
-Essayons de suivre quelques principes du [trunk based development](https://paulhammant.com/2013/04/05/what-is-trunk-based-development/) :
-
-- Une branche `main` protégée
-- Chaque nouvelle branche part de `main` pour y ajouter une feature, un fix, etc., puis sera mergée sur `main` avec une Merge Request
-- Si une autre branche `feature` est mergée sur `main` avant la vôtre, faites un `git rebase main` depuis votre branche `feature` pour être à jour
-
-_À votre tour !_
+[MIT](./LICENSE)
